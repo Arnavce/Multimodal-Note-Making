@@ -1,0 +1,12 @@
+ -- netstat -ano | findstr :3000
+
+  TCP    0.0.0.0:3000           0.0.0.0:0              LISTENING       18040
+
+
+ -- tasklist | findstr 18040
+
+node.exe                    18040 Console                    1     25,620 K
+
+taskkill /PID 18040 /F
+
+

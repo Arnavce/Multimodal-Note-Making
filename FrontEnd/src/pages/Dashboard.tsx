@@ -25,7 +25,7 @@ export function Dashboard() {
         const token = localStorage.getItem("token");
         if (!token) {
           console.error("No token found! Redirecting to Signin...");
-          navigate("/signin");
+          navigate("/login");
           return;
         }
 
@@ -124,7 +124,7 @@ export function Dashboard() {
           <button
             onClick={() => {
               localStorage.removeItem("token");
-              navigate("/signin");
+              navigate("/login");
             }}
             className=" bg-white text-purple-500 border-2 font-bold px-4 py-2 rounded-md hover:bg-purple-500 hover:text-white cursor-pointer transition mr-6"
           >
@@ -152,32 +152,6 @@ export function Dashboard() {
           />
         ))}
       </div>
-{/* 
-      <div className="flex flex-row gap-4 justify-end p-6">
-        <div onClick={() => navigate("/texteditor")}>
-          <svg 
-            className="hover:fill-purple-500 cursor-pointer" 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="100" 
-            height="100" 
-            viewBox="0 0 50 50"
-          >
-            <path d="M 7 2 L 7 48 L 43 48 L 43 14.59375 L 42.71875 14.28125 L 30.71875 2.28125 L 30.40625 2 Z M 9 4 L 29 4 L 29 16 L 41 16 L 41 46 L 9 46 Z M 31 5.4375 L 39.5625 14 L 31 14 Z M 15 22 L 15 24 L 35 24 L 35 22 Z M 15 28 L 15 30 L 31 30 L 31 28 Z M 15 34 L 15 36 L 35 36 L 35 34 Z"/>
-          </svg>
-        </div>
-
-        <div onClick={() => navigate("/canvas")}>
-          <svg 
-            className="hover:fill-purple-500 cursor-pointer"  
-            xmlns="http://www.w3.org/2000/svg"  
-            width="200" 
-            height="210"  
-            viewBox="0 0 50 50"
-          >
-            <path d="M20 2C21.6569 2 23 3.34315 23 5V7H21V19C21 20.6569 19.6569 22 18 22H4C2.34315 22 1 20.6569 1 19V17H17V19C17 19.5128 17.386 19.9355 17.8834 19.9933L18 20C18.5128 20 18.9355 19.614 18.9933 19.1166L19 19V4H6C5.48716 4 5.06449 4.38604 5.00673 4.88338L5 5V15H3V5C3 3.34315 4.34315 2 6 2H20Z"/>
-          </svg>
-        </div>
-      </div> */}
       <AddDocument />
     </div>
   );

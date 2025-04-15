@@ -8,6 +8,7 @@ import { Dashboard } from "./pages/Dashboard"
 import  Signin  from "./pages/Signin"
 import  DrawPage  from "./pages/CSSCanvas"
 import Signup from './pages/Signup'
+import ExcalidrawExample from './pages/excali'
 
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
       <Route path="/login" element={<Signin />} />
       <Route path="/csscanvas" element={<DrawPage />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/excali" element={<ExcalidrawExample/>} />
+
 
     </Routes>
 

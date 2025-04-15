@@ -66,3 +66,15 @@ const CanvasSchema = new mongoose.Schema({
 });
 
 export const CanvasModel = mongoose.model("Canvas", CanvasSchema);
+
+const tldraw = new mongoose.Schema({
+  type: { type: String, default: "canvas" },
+  data: {
+    type: mongoose.Schema.Types.Mixed, 
+    required: true,
+  },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+export const TldrawModel = mongoose.model("Tldraw", tldraw);

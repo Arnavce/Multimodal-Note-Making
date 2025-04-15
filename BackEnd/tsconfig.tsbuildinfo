@@ -1,1 +1,1 @@
-{"root":["./src/app.ts","./src/index.ts","./src/middlewares/middleware.ts","./src/routes/auth/login.ts","./src/routes/auth/signup.ts","./src/routes/canvas/canvas.ts","./src/routes/notes/notes.ts","./src/db/db.ts"],"version":"5.8.2"}
+{"root":["./src/app.ts","./src/index.ts","./src/middlewares/middleware.ts","./src/routes/auth/login.ts","./src/routes/auth/signup.ts","./src/routes/canvas/canvas.ts","./src/routes/notes/notes.ts","./src/routes/tldraw/tldraw.ts","./src/db/db.ts"],"version":"5.8.2"}

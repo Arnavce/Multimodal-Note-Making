@@ -5,13 +5,12 @@ import { useNavigate } from "react-router-dom";
 import SearchBar from "../Components/searchBar";
 import { AddDocument } from "../Components/AddDocument";
 
-
 interface Document {
   _id: string;
   title: string;
   type: "text" | "canvas";
   createdAt: string;
-  tags: string;
+  tags: string; 
 }
 
 export function Dashboard() {
@@ -36,7 +35,7 @@ export function Dashboard() {
               Authorization: `${token}`,
             },
           }),
-          axios.get("http://localhost:3000/api/v0/canvas", {
+          axios.get("http://localhost:3000/api/v0/tldraw", {
             headers: {
               "Content-Type": "application/json",
               Authorization: `${token}`,
@@ -52,10 +51,12 @@ export function Dashboard() {
           tags: doc.tags,
         }));
 
-        const canvases = canvasResponse.data.document.map((canvas: any) => ({
+        const canvases = canvasResponse.data.canvases.map((canvas: any) => ({
           _id: canvas._id,
           title: canvas.title,
+          createdAt: canvas.createdAt,
           type: "canvas",
+          tags: canvas.tags,
         }));
 
         setDocuments([...notes, ...canvases]);
@@ -68,7 +69,7 @@ export function Dashboard() {
     }
 
     fetchData();
-  }, [navigate, ]);
+  }, [navigate]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event.target.value);
@@ -108,7 +109,7 @@ export function Dashboard() {
           </svg>
           
           <div className="text-2xl font-bold font-sans text-purple-500 pl-2">
-            DASHBOARD
+            SECOND BRAIN
           </div>
 
           <div className="pl-75 ">
@@ -139,9 +140,8 @@ export function Dashboard() {
             onTitleClick={() => {
               navigate(doc.type === "text" 
                 ? `/texteditor/${doc._id}` 
-                : `/canvas/${doc._id}`);
+                : `/excali/${doc._id}`);
             }}
-            
             key={doc._id}
             title={doc.title}
             type={doc.type}

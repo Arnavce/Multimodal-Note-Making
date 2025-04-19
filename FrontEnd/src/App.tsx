@@ -21,7 +21,7 @@ function App() {
       <Route path="/login" element={<Signin />} />
       <Route path="/csscanvas" element={<DrawPage />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/excali" element={<ExcalidrawExample/>} />
+      <Route path="/excali/:documentid?" element={<ExcalidrawExample />} />
 
 
     </Routes>

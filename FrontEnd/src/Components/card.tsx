@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { MdEdit , MdDelete } from 'react-icons/md';
+import { MdEdit, MdDelete } from 'react-icons/md';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
 
 interface CardProps {
   title: string;
@@ -33,41 +32,50 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
     onEdit(editedTags);
     setIsEditingTags(false);
     console.log("Saved tags:", editedTags);
+
     const token = localStorage.getItem("token");
-    axios.post(`http://localhost:3000/api/v0/notes/${documentId}/tags`, {
+    const route = type === 'text'
+      ? `http://localhost:3000/api/v0/notes/${documentId}/tags`
+      : `http://localhost:3000/api/v0/tldraw/${documentId}/tags`;
+
+    axios.post(route, {
       tags: editedTags,
-    },{
+    }, {
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
       },
-    } );
-  Navigate(0);
-  }
+    })
+    .then(() => {
+      Navigate(0);
+    })
+    .catch(error => {
+      console.error("Error saving tags:", error);
+    });
+  };
 
   const DeleteHandler = () => {
     const token = localStorage.getItem("token");
-  
+
     if (window.confirm("Are you sure you want to delete this note?")) {
-      axios.delete(`http://localhost:3000/api/v0/notes/${documentId}`, {
+      const route = type === 'text'
+        ? `http://localhost:3000/api/v0/notes/${documentId}`
+        : `http://localhost:3000/api/v0/tldraw/${documentId}`;
+
+      axios.delete(route, {
         headers: {
           "Content-Type": "application/json",
           Authorization: token,
         },
       })
       .then(() => {
-        Navigate(0); 
+        Navigate(0);
       })
       .catch(error => {
-        console.error("Error deleting note:", error);
+        console.error("Error deleting document:", error);
       });
-     } 
-    // else {
-    //   Navigate(0);
-    // }
+    }
   };
-
-  
 
   return (
     <div className="relative">
@@ -77,7 +85,7 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
       >
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
-            <h6  onClick={onTitleClick} className="text-sm font-medium text-gray-800 py-2 pl-3 hover:underline">{title}</h6>
+            <h6 onClick={onTitleClick} className="text-sm font-medium text-gray-800 py-2 pl-3 hover:underline">{title}</h6>
             <span className="text-xs text-gray-500 pl-3">
               {createdAt
                 ? new Date(createdAt).toLocaleDateString('en-US', {
@@ -90,16 +98,16 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
             <div className="text-xs text-slate-500 pl-3 mt-1">{tags}</div>
           </div>
 
-          <div className="flex items-center gap-2 ">
+          <div className="flex items-center gap-2">
             <MdEdit
               onClick={handleEditClick}
-              className="text-gray-500  hover:text-blue-500 cursor-pointer"
+              className="text-gray-500 hover:text-blue-500 cursor-pointer"
             />
             <MdDelete
               onClick={DeleteHandler}
               className="text-gray-500 hover:text-red-500 cursor-pointer"
             />
-        
+
             {type === 'text' && (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +117,6 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
                 stroke="currentColor"
                 className="size-12"
               >
-                
                 <path
                   className="hover:fill-[#318CE7] text-gray-500"
                   strokeLinecap="round"

@@ -1,97 +1,152 @@
-import { Tldraw, getSnapshot } from 'tldraw';
-import 'tldraw/tldraw.css';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import {
+  Tldraw,
+  getSnapshot,
+  loadSnapshot,
+  type TLEditorSnapshot
+} from 'tldraw'
+import 'tldraw/tldraw.css'
+import { useNavigate, useParams } from 'react-router-dom'
 
 export default function ExcalidrawExample() {
-  const [canvasData, setCanvasData] = useState<any>(null);
-  const [documentId, setDocumentId] = useState<string>('1234'); // Set default ID for testing or can be dynamic
-  const [editor, setEditor] = useState<any>(null); // To store editor instance
+  const navigate = useNavigate()
+  const { documentid } = useParams()
+  const [documentId, setDocumentId] = useState<string>(documentid || '')
+  const [editor, setEditor] = useState<any>(null)
+  const [title, setTitle] = useState<string>('')
 
-  // Fetch the canvas data on component mount or when documentId changes
   useEffect(() => {
-    if (documentId) {
-      axios
-        .get(`http://localhost:3000/api/v0/tldraw/${documentId}`)
-        .then((response) => {
-          if (response.data.tldraw) {
-            setCanvasData(response.data.tldraw.data);
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching canvas data:', error);
-        });
+    if (!documentId || !editor) return
+
+    const fetchAndLoadCanvas = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/v0/tldraw/${documentId}`)
+        const fetchedData = response.data?.tldraw?.data
+        const fetchedTitle = response.data?.tldraw?.title || ''
+
+        if (fetchedData) {
+          console.log('✅ Fetched Canvas Data:', fetchedData)
+
+          setTitle(fetchedTitle)
+
+       
+          loadSnapshot(editor.store, fetchedData as TLEditorSnapshot)
+
+         
+        }
+      } catch (error) {
+        console.error('❌ Error fetching/loading canvas data:', error)
+      }
     }
-  }, [documentId]);
 
-  const saveCanvasData = async() => {
-    if (!editor) return; // Ensure the editor is loaded
-    const data = getSnapshot(editor.store); // Get snapshot from editor store
+    fetchAndLoadCanvas()
+  }, [documentId, editor])
 
-    if (!data) return; // Prevent saving if there's no data
+  const saveCanvasData = async () => {
+    if (!editor) return
 
-    // Send the data to the backend (either create or update)
-   const response1 = await  axios
-      .post('http://localhost:3000/api/v0/tldraw', {
-        documentId: documentId || '1234', // If documentId exists, update; otherwise, create
-        title: 'My Canvas Title', // You can change this to your dynamic title
-        data: data, // The data of the canvas
-      })
-      .then((response) => {
-        // Handle success response (e.g., save documentId if new document is created)
-        const createdDocumentId = response.data.tldraw._id || '1234';
-        setDocumentId(createdDocumentId); // Update the documentId if it's a new one
-        alert('Canvas saved successfully!');
-      })
-      .catch((error) => {
-        console.error('Error saving canvas:', error);
-        alert('Failed to save canvas');
-      });
-  };
+    try {
+      const token = localStorage.getItem('token')
+
+      const snapshot = getSnapshot(editor.store)
+      const fullSnapshot: TLEditorSnapshot = {
+        document: snapshot.document,
+        session: snapshot.session
+      }
+
+      console.log('📤 Saving Snapshot:', fullSnapshot)
+
+      const response = await axios.post(
+        'http://localhost:3000/api/v0/tldraw',
+        {
+          documentId: documentId !== '' ? documentId : undefined,
+          title,
+          data: fullSnapshot,
+        },
+        {
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          }
+        }
+      )
+
+      const savedId = response.data?.tldraw?._id
+      if (savedId && documentId === '') {
+        setDocumentId(savedId)
+        navigate(`/excali/${savedId}`)
+      }
+
+      alert('✅ Saved successfully!')
+      console.log('✅ Response from server:', response.data)
+    } catch (error: any) {
+      console.error('❌ Save failed:', error)
+      alert('❌ Save failed')
+
+      if (error.response.data.error.includes("E11000 duplicate key error")) {
+        alert("Pleae Bhai title change karde please");
+      }
+      else if (error.response) {
+        console.error(
+          "Server Error:",
+          error.response.status,
+          error.response.data
+        );
+      } else if (error.request) {
+        console.error("No Response Received:", error.request);
+      } else {
+        console.error("Axios Error:", error.message);
+      }
+    
+    }
+  }
 
   return (
     <div style={{ position: 'relative', height: '100vh' }}>
-      <Tldraw
-        onMount={(editorInstance) => {
-          // Set the editor instance
-          setEditor(editorInstance);
+      {/* 🔹 Top bar with title and save button */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-300">
+  {/* 🔙 Dashboard Button */}
+  <button
+    onClick={() => navigate('/dashboard')}
+    className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
+  >
+    <span className="text-xl">←</span> Dashboard
+  </button>
 
-          // If canvas data exists, set it in the editor
-          if (canvasData) {
-            editorInstance.store.setState(canvasData); // Apply fetched data to the editor
-          }
+  {/* 📝 Title Input */}
+  <input
+    type="text"
+    value={title}
+    onChange={(e) => setTitle(e.target.value)}
+    placeholder="Enter document title..."
+    className="flex-1 mx-4 px-4 py-2 text-lg font-semibold border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+  />
 
-          // Subscribe to store changes to capture real-time updates
-          const unsubscribe = editorInstance.store.listen(() => {
-            const updatedSnapshot = getSnapshot(editorInstance.store);
-            setCanvasData(updatedSnapshot);
-            console.log('Updated Canvas Data:', updatedSnapshot);
-          }, { scope: 'all' });
+  {/* 💾 Save Button */}
+  <button
+    onClick={saveCanvasData}
+    className="px-5 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow"
+  >
+    Save
+  </button>
+</div>
 
-          // Clean up on unmount
-          return () => {
-            unsubscribe();
-          };
-        }}
-      />
 
-      {/* Save Button */}
-      <button
-        onClick={saveCanvasData}
-        style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-        }}
-      >
-        Save Canvas
-      </button>
+      {/* 🔹 Tldraw canvas (adjust for top bar height) */}
+      <div className="pt-20 h-full">
+        <Tldraw
+          onMount={(editorInstance) => {
+            setEditor(editorInstance)
+            const unsubscribe = editorInstance.store.listen(() => {
+              const updatedSnapshot = getSnapshot(editorInstance.store)
+              console.log('🖊️ Updated Canvas Data:', updatedSnapshot)
+            }, { scope: 'all' })
+
+            return () => unsubscribe()
+          }}
+        />
+      </div>
     </div>
-  );
+  )
 }

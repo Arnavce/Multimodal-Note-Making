@@ -6,6 +6,7 @@ dotenv.config();
 
 const MONGO_URL = process.env.MONGO_URL as string;
 
+
 if (!MONGO_URL) {
   throw new Error("MONGO_URL is not defined in .env file");
 }
@@ -67,14 +68,21 @@ const CanvasSchema = new mongoose.Schema({
 
 export const CanvasModel = mongoose.model("Canvas", CanvasSchema);
 
-const tldraw = new mongoose.Schema({
-  type: { type: String, default: "canvas" },
-  data: {
-    type: mongoose.Schema.Types.Mixed, 
-    required: true,
+const tldraw = new mongoose.Schema(
+  {
+    type: { type: String, default: "canvas" },
+    data: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
+    title: { type: String, required: true, unique: true },
+  tags: { type: String, default: "#hashtags" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now },
   },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
-});
+  {
+    minimize: false,
+  }
+);
 
 export const TldrawModel = mongoose.model("Tldraw", tldraw);

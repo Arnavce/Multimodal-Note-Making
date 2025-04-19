@@ -15,6 +15,7 @@ interface Shape {
   color: Color;
 }
 
+
 interface TextArea {
   id: string;
   x: number;

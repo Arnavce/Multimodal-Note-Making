@@ -1,67 +1,158 @@
+import { title } from 'process';
 import express, { Request, Response } from "express";
-import { TldrawModel } from "../../db/db"; // Make sure the path is correct
+import { TldrawModel } from "../../db/db";
+import { middleware } from "../../Middlewares/Middleware";
 
 const router = express.Router();
 
+// POST route to save or update Tldraw canvas
+router.post("/", middleware, async (req: Request, res: Response): Promise<void> => {
+    const { documentId, data, title } = req.body;
+    // @ts-ignore
+    const userId = req.userId;
 
-router.post("/", async (req: Request, res: Response): Promise<void> => {
-    const { documentId, title, data } = req.body;
+    console.log("Received POST request for Tldraw:");
+    console.log("documentId:", documentId);
+    console.log("userId:", userId);
+    console.log("typeof data:", typeof data);
+    console.log("current wala canvas")
+    console.dir(data, { depth: null });
 
    
-    if (documentId === "1234") {
+    if (!documentId || documentId === "") {
         try {
-            
-            const existingCanvas = await TldrawModel.findOneAndUpdate(
+            const newCanvas = await TldrawModel.create({
+                data,
+                userId,
+                title,
+                
+            });
+         
+            console.log("New canvas created successfully", newCanvas);
+            res.json({
+                message: "Tldraw canvas created successfully",
+                tldraw: newCanvas,
+            });
+        } catch (e: any) {
+            res.status(500).json({
+                error: "Error creating canvas: " + e.message,
+            });
+        }
+    }
+
+
+    if (documentId && documentId !== "" && data) {
+        try {
+            const updatedCanvas = await TldrawModel.findOneAndUpdate(
                 { _id: documentId },
-                { title, data },
-                { new: true, upsert: true } // upsert will create a new document if none exists
+                {
+                    data,
+                    userId,
+                    title,
+                },
+                { new: true }
             );
 
             res.json({
-                message: "Tldraw canvas saved/updated successfully",
-                tldraw: existingCanvas,
+                message: "Tldraw canvas updated successfully",
+                tldraw: updatedCanvas,
             });
         } catch (e: any) {
-            res.status(411).json({
-                error: e.message,
+            res.status(500).json({
+                error: "Error updating canvas: " + e.message,
             });
         }
-    } else {
-        res.status(400).json({
-            error: "Invalid documentId. Expected '1234'.",
-        });
     }
 });
 
-// Get Tldraw canvas by ID (only '1234' allowed)
-router.get("/:canvasId", async (req: Request, res: Response): Promise<void> => {
+router.get("/:canvasId", async (req: Request, res: Response): Promise<void | any> => {
     const { canvasId } = req.params;
 
-    // If the canvasId is "1234"
-    if (canvasId === "1234") {
-        try {
-            const tldraw = await TldrawModel.findOne({ _id: canvasId });
+    try {
+      
 
-            if (tldraw) {
-                res.json({
-                    message: "Tldraw canvas found",
-                    tldraw,
-                });
-            } else {
-                res.status(404).json({
-                    error: "Tldraw canvas not found",
-                });
-            }
-        } catch (e: any) {
-            res.status(411).json({
-                error: e.message,
-            });
+        const tldraw = await TldrawModel.findOne({ _id: canvasId }).lean();
+
+        if (!tldraw) {
+            return res.status(404).json({ error: "Tldraw canvas not found" });
         }
-    } else {
-        res.status(400).json({
-            error: "Invalid canvasId. Expected '1234'.",
+
+        
+        const rawData = JSON.parse(JSON.stringify(tldraw));
+
+        res.json({
+            message: "Tldraw canvas found",
+            tldraw: rawData
+        });
+
+    } catch (e: any) {
+        res.status(500).json({
+            error: "Error retrieving canvas: " + e.message,
         });
     }
 });
+
+
+
+router.get("/", middleware, async (req: Request, res: Response): Promise<void> => {
+    //@ts-ignore
+    const userId = req.userId;
+  
+    try {
+      const canvases = await TldrawModel.find({ userId }, { data: 0 }); // Exclude heavy canvas data if not needed
+      res.json({
+        message: "Tldraw canvases found",
+        canvases,
+      });
+    } catch (e: any) {
+      res.status(500).json({
+        error: "Error retrieving canvases: " + e.message,
+      });
+    }
+  });
+  
+
+  router.delete("/:canvasId", middleware, async (req: Request, res: Response): Promise<void> => {
+    //@ts-ignore
+    const userId = req.userId;
+    const { canvasId } = req.params;    
+    try {
+      const canvas = await TldrawModel.findOneAndDelete({
+        _id: canvasId
+      });
+      res.json({
+        message: "Canvas deleted successfully",
+        canvas
+      })
+    } catch(e:any) {
+      res.status(411).json({
+        error: e.message
+      })
+    }
+  });
+
+  router.post("/:canvasId/tags", middleware, async (req: Request, res: Response): Promise<void> => {
+    //@ts-ignore
+    const userId = req.userId;
+    const { canvasId } = req.params;
+    const { tags } = req.body;
+    try {
+      const canvas = await TldrawModel.findOneAndUpdate({
+        _id: canvasId
+      },{
+        tags,
+      })
+      res.json({
+        message: "Canvas updated successfully",
+        canvas
+      })
+    } catch(e:any) {
+      res.status(411).json({
+        error: e.message
+      })
+    }
+  });
+
+
 
 export default router;

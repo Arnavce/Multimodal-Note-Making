@@ -31,7 +31,7 @@ export function AddDocument() {
 
             
               <div  onClick={()=>{
-                navigate("/canvas")
+                navigate("/excali")
               }} className="flex flex-col items-center hover:cursor-pointer hover:bg-gray-300 rounded-2xl p-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" 
                   viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sticky-note-icon lucide-sticky-note">

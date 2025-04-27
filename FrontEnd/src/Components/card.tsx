@@ -17,6 +17,7 @@ interface CardProps {
 export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit, onTitleClick }: CardProps) {
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [editedTags, setEditedTags] = useState(tags);
+    let refreshTags :boolean = false;
   const Navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,31 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
     e.stopPropagation();
     setIsEditingTags(true);
   };
+
+  const handleRefreshTags =  () => {
+ refreshTags = true;
+    const token = localStorage.getItem("token");
+    const route = type === 'text'
+      ? `http://localhost:3000/api/v0/notes/${documentId}/tags`
+      : `http://localhost:3000/api/v0/tldraw/${documentId}/tags`;
+
+    axios.post(route, {
+      tags: editedTags,
+      refreshTags: refreshTags,
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    })
+    .then(() => {
+      Navigate(0);
+    })
+    .catch(error => {
+      console.error("Error refreshing tags:", error);
+    });
+  };
+
 
   const handleSaveTags = () => {
     onEdit(editedTags);
@@ -40,6 +66,7 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
 
     axios.post(route, {
       tags: editedTags,
+      refreshTags: refreshTags,
     }, {
       headers: {
         "Content-Type": "application/json",
@@ -81,7 +108,7 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
     <div className="relative">
       <div
         onClick={onClick}
-        className="border rounded p-2 bg-white hover:shadow-xl transition-all ease-in-out cursor-pointer h-24 w-100"
+        className="border rounded p-2 bg-white hover:shadow-xl transition-all ease-in-out cursor-pointer h-34 w-100"
       >
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
@@ -158,20 +185,34 @@ export function Card({ title, documentId, type, onClick, createdAt, tags, onEdit
               placeholder="Enter tags (comma-separated)"
               className="w-full p-2 border rounded mb-4"
             />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsEditingTags(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveTags}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
-            </div>
+<div className="flex justify-between gap-2">
+
+  <button
+    onClick={() => {
+      handleRefreshTags()}
+    }
+    className="px-4 py-2 bg-purple-400 rounded-full text-white hover:bg-purple-600"
+  >
+    Refresh Tags
+  </button>
+  
+  <div className="flex gap-2">
+    <button
+      onClick={() =>{ setIsEditingTags(false)}
+      }
+      className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded"
+    >
+      Cancel
+    </button>
+    <button
+      onClick={handleSaveTags}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      Save
+    </button>
+  </div>
+</div>
+
           </div>
         </div>
       )}

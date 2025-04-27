@@ -28,7 +28,7 @@ export const UserModel = model("User", userSchema);
 const documentSchema = new mongoose.Schema({
   type: { type: String, default: "text" },
   title: { type: String, required: true, unique: true },
-  content: { type: String, required: true },
+  content: { type: String, required: true, unique: false },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

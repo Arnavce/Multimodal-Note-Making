@@ -11,12 +11,12 @@ router.post("/", middleware, async (req: Request, res: Response): Promise<void> 
     // @ts-ignore
     const userId = req.userId;
 
-    console.log("Received POST request for Tldraw:");
-    console.log("documentId:", documentId);
-    console.log("userId:", userId);
-    console.log("typeof data:", typeof data);
-    console.log("current wala canvas")
-    console.dir(data, { depth: null });
+    // console.log("Received POST request for Tldraw:");
+    // console.log("documentId:", documentId);
+    // console.log("userId:", userId);
+    // console.log("typeof data:", typeof data);
+    // console.log("current wala canvas")
+    // console.dir(data, { depth: null });
 
    
     if (!documentId || documentId === "") {

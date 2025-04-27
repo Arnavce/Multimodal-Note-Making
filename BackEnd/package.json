@@ -16,10 +16,12 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/mongoose": "^5.11.96",
     "bcrypt": "^5.1.1",
+    "compromise": "^14.14.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "keyword-extractor": "^0.0.28",
     "mongoose": "^8.13.1",
     "typecript": "^0.0.1-security",
     "typescript": "^5.8.2"

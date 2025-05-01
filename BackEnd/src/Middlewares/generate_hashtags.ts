@@ -7,7 +7,7 @@ import axios from 'axios';
  * @returns Array of hashtags like ['#AI', '#machinelearning', ...]
  */
 export async function generateHashtags(noteText: string, maxHashtags: number = 10): Promise<string[]> {
-  const apiKey = 'AIzaSyCIZV4_a_cgC6bR1g64JpwwAp6004s9mAQ';  // Replace with your actual Gemini API Key
+  const apiKey = 'Hehehe';  // Replace with your actual Gemini API Key
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   
   // Create a specific prompt asking for hashtags
